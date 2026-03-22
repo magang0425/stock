@@ -3,9 +3,11 @@
 
 import logging
 import concurrent.futures
+import pandas as pd
 import instock.core.stockfetch as stf
 import instock.core.tablestructure as tbs
 import instock.lib.trade_time as trd
+import instock.lib.database as mdb
 from instock.lib.singleton_type import singleton_type
 
 __author__ = 'myh '
@@ -26,9 +28,22 @@ class stock_data(metaclass=singleton_type):
 
 # 读取股票历史数据
 class stock_hist_data(metaclass=singleton_type):
-    def __init__(self, date=None, stocks=None, workers=16):
+    def __init__(self, date=None, stocks=None, workers=4):
         if stocks is None:
-            _subset = stock_data(date).get_data()[list(tbs.TABLE_CN_STOCK_FOREIGN_KEY['columns'])]
+            _subset = None
+            try:
+                table_name = tbs.TABLE_CN_STOCK_SPOT['name']
+                if date is not None and mdb.checkTableIsExist(table_name):
+                    sql = f"SELECT `date`,`code`,`name` FROM `{table_name}` WHERE `date` = '{date}'"
+                    _subset = pd.read_sql(sql=sql, con=mdb.engine())
+                    if _subset is not None and len(_subset.index) > 0:
+                        _subset["date"] = _subset["date"].astype(str)
+            except Exception as e:
+                logging.error(f"singleton.stock_hist_data读取现货表处理异常：{e}")
+
+            if _subset is None or len(_subset.index) == 0:
+                _subset = stock_data(date).get_data()[list(tbs.TABLE_CN_STOCK_FOREIGN_KEY['columns'])]
+
             stocks = [tuple(x) for x in _subset.values]
         if stocks is None:
             self.data = None

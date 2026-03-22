@@ -3,10 +3,12 @@
 
 
 import json
+import logging
 from abc import ABC
 from tornado import gen
 # import logging
 import datetime
+import pymysql
 import instock.lib.trade_time as trd
 import instock.core.singleton_stock_web_module_data as sswmd
 import instock.web.base as webBase
@@ -66,6 +68,14 @@ class GetStockDataHandler(webBase.BaseHandler, ABC):
             order_columns = f",{web_module_data.order_columns}"
 
         sql = f" SELECT *{order_columns} FROM `{web_module_data.table_name}`{where}{order_by}"
-        data = self.db.query(sql,date)
+        try:
+            data = self.db.query(sql, date)
+        except pymysql.err.ProgrammingError as e:
+            # Some modules may be visible before their backing tables are initialized.
+            if e.args and e.args[0] == 1146:
+                logging.warning(f"GetStockDataHandler表不存在：{web_module_data.table_name}")
+                data = []
+            else:
+                raise
 
         self.write(json.dumps(data, cls=MyEncoder))

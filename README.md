@@ -239,6 +239,36 @@ K线形态作业 klinepattern_data_daily_job.py
 
 下面按分常规安装方式、docker镜像安装方式进行一一说明。
 
+## Git Fork 同步建议
+
+如果你是通过 GitHub Fork 本项目进行二次开发，建议保留以下远程配置：
+
+```bash
+origin   -> 你的 fork 仓库
+upstream -> 原项目仓库
+```
+
+例如：
+
+```bash
+git remote set-url origin https://github.com/<your-name>/stock.git
+git remote add upstream https://github.com/myhhub/stock.git
+```
+
+日常同步上游代码时可使用：
+
+```bash
+git fetch upstream
+git merge upstream/master
+```
+
+如果本地已经配置了 alias，也可以直接使用：
+
+```bash
+git sync-upstream
+git sync-upstream-rebase
+```
+
 ## 一：常规安装方式
 
 建议windows下安装，方便操作及使用系统，同时安装也非常简单。
