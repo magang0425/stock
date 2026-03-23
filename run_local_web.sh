@@ -6,8 +6,8 @@ ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 cd "$ROOT_DIR"
 
-if [ ! -d ".venv" ]; then
-  echo ".venv 不存在，请先创建本地虚拟环境。" >&2
+if ! command -v uv >/dev/null 2>&1; then
+  echo "未检测到 uv，请先安装 uv。" >&2
   exit 1
 fi
 
@@ -16,9 +16,8 @@ if [ ! -f ".env" ]; then
   exit 1
 fi
 
-source .venv/bin/activate
 set -a
 source .env
 set +a
 
-exec python instock/web/web_service.py
+exec uv run --frozen instock-web

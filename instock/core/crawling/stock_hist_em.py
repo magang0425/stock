@@ -19,6 +19,71 @@ __date__ = '2025/12/31 '
 # 创建全局实例，供所有函数使用
 fetcher = eastmoney_fetcher()
 
+
+def _stock_zh_a_hist_tx(
+    symbol: str,
+    start_date: str = "19700101",
+    end_date: str = "20500101",
+    adjust: str = "qfq",
+) -> pd.DataFrame:
+    if symbol.startswith("6"):
+        secid = f"sh{symbol}"
+    elif symbol.startswith(("4", "8", "9")):
+        secid = f"bj{symbol}"
+    else:
+        secid = f"sz{symbol}"
+
+    fq_map = {"qfq": "qfq", "hfq": "hfq", "": ""}
+    response = fetcher.make_request(
+        "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+        params={"param": f"{secid},day,,,1500,{fq_map[adjust]}"},
+        timeout=10,
+    )
+    response.raise_for_status()
+    data_json = response.json()
+    data = data_json.get("data", {}).get(secid, {})
+    key = f"{fq_map[adjust]}day" if fq_map[adjust] else "day"
+    klines = data.get(key, [])
+    if not klines:
+        return pd.DataFrame()
+
+    normalized_rows = []
+    for row in klines:
+        row = list(row)
+        if len(row) < 6:
+            continue
+        normalized_rows.append(row[:7] if len(row) >= 7 else row + [None])
+    temp_df = pd.DataFrame(
+        normalized_rows,
+        columns=["日期", "开盘", "收盘", "最高", "最低", "成交量", "_成交额"],
+    )
+    temp_df["日期"] = pd.to_datetime(temp_df["日期"])
+    temp_df = temp_df.loc[
+        (temp_df["日期"] >= pd.to_datetime(start_date, format="%Y%m%d")) &
+        (temp_df["日期"] <= pd.to_datetime(end_date, format="%Y%m%d"))
+    ].copy()
+    if temp_df.empty:
+        return pd.DataFrame()
+
+    for col in ["开盘", "收盘", "最高", "最低", "成交量", "_成交额"]:
+        temp_df[col] = pd.to_numeric(temp_df[col], errors="coerce")
+
+    prev_close = temp_df["收盘"].shift(1)
+    temp_df["成交额"] = temp_df["_成交额"].fillna(temp_df["收盘"] * temp_df["成交量"] * 100)
+    temp_df["振幅"] = ((temp_df["最高"] - temp_df["最低"]) / prev_close.replace(0, pd.NA)) * 100
+    temp_df["涨跌幅"] = (temp_df["收盘"] / prev_close.replace(0, pd.NA) - 1) * 100
+    temp_df["涨跌额"] = temp_df["收盘"] - prev_close
+    temp_df["换手率"] = 0.0
+    temp_df["振幅"] = temp_df["振幅"].fillna(0.0)
+    temp_df["涨跌幅"] = temp_df["涨跌幅"].fillna(0.0)
+    temp_df["涨跌额"] = temp_df["涨跌额"].fillna(0.0)
+
+    temp_df = temp_df[
+        ["日期", "开盘", "收盘", "最高", "最低", "成交量", "成交额", "振幅", "涨跌幅", "涨跌额", "换手率"]
+    ]
+    temp_df.reset_index(drop=True, inplace=True)
+    return temp_df
+
 def stock_zh_a_spot_em() -> pd.DataFrame:
     """
     东方财富网-沪深京 A 股-实时行情
@@ -355,10 +420,17 @@ def stock_zh_a_hist(
         "end": end_date,
         "_": "1623766962675",
     }
-    r =  fetcher.make_request(url, params=params)
-    data_json = r.json()
-    if not (data_json["data"] and data_json["data"]["klines"]):
-        return pd.DataFrame()
+    try:
+        r = fetcher.make_request(url, params=params)
+        data_json = r.json()
+        if not (data_json["data"] and data_json["data"]["klines"]):
+            raise ValueError(f"empty eastmoney kline for {symbol}")
+    except Exception as e:
+        if period != "daily":
+            logging.warning(f"stock_zh_a_hist东方财富降级失败：{symbol} {e}")
+            return pd.DataFrame()
+        logging.warning(f"stock_zh_a_hist使用腾讯日线降级：{symbol} {e}")
+        return _stock_zh_a_hist_tx(symbol=symbol, start_date=start_date, end_date=end_date, adjust=adjust)
     temp_df = pd.DataFrame(
         [item.split(",") for item in data_json["data"]["klines"]]
     )

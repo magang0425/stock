@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "instock"
+version = "4.0.0"
+description = "InStock 股票系统"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "arrow==1.4.0",
+  "beautifulsoup4==4.14.3",
+  "bokeh==3.8.1",
+  "brotli==1.2.0",
+  "easytrader==0.23.7",
+  "logbook==1.9.2",
+  "mini-racer==0.13.2",
+  "numpy==2.4.1",
+  "pandas==2.3.3",
+  "py-mini-racer==0.6.0",
+  "pycryptodome==3.23.0",
+  "pymysql==1.1.2",
+  "python-dateutil==2.9.0.post0",
+  "requests==2.32.5",
+  "sqlalchemy==2.0.45",
+  "ta-lib==0.6.8",
+  "tornado==6.5.4",
+  "tqdm==4.67.1",
+  "urllib3==2.6.3",
+]
+
+[project.scripts]
+instock-job = "instock.cli:job"
+instock-web = "instock.cli:web"
+
+[tool.hatch.build.targets.wheel]
+packages = ["instock"]
