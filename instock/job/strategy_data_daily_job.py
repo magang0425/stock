@@ -14,7 +14,6 @@ import instock.lib.run_template as runt
 import instock.core.tablestructure as tbs
 import instock.lib.database as mdb
 from instock.core.singleton_stock import stock_hist_data
-from instock.core.stockfetch import fetch_stock_top_entity_data
 
 __author__ = 'myh '
 __date__ = '2023/3/10 '
@@ -55,18 +54,10 @@ def prepare(date, strategy):
 
 
 def run_check(strategy_fun, table_name, stocks, date, workers=40):
-    is_check_high_tight = False
-    if strategy_fun.__name__ == 'check_high_tight':
-        stock_tops = fetch_stock_top_entity_data(date)
-        if stock_tops is not None:
-            is_check_high_tight = True
     data = []
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-            if is_check_high_tight:
-                future_to_data = {executor.submit(strategy_fun, k, stocks[k], date=date, istop=(k[1] in stock_tops)): k for k in stocks}
-            else:
-                future_to_data = {executor.submit(strategy_fun, k, stocks[k], date=date): k for k in stocks}
+            future_to_data = {executor.submit(strategy_fun, k, stocks[k], date=date): k for k in stocks}
             for future in concurrent.futures.as_completed(future_to_data):
                 stock = future_to_data[future]
                 try:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from instock.core.strategy import turtle_trade
+from instock.core.strategy import enter
 
 __author__ = 'myh '
 __date__ = '2023/3/10 '
@@ -30,7 +30,7 @@ def check(code_name, data, date=None, threshold=15):
     # 找出涨停日
     for _close, _p_change, _date in zip(data['close'].values, data['p_change'].values, data['date'].values):
         if _p_change > 9.5:
-            if turtle_trade.check_enter(code_name, origin_data, date=pd.Timestamp(_date).date(), threshold=threshold):
+            if enter.check_volume(code_name, origin_data, date=pd.Timestamp(_date).date(), threshold=threshold):
                 limitup_row[0] = _close
                 limitup_row[1] = _date
                 if check_internal(data, limitup_row):
@@ -47,12 +47,12 @@ def check_internal(data, limitup_row):
     consolidation_day1 = limitup_end.iloc[0]
     consolidation_day23 = limitup_end.tail(n=2)
 
-    if not (consolidation_day1['close'] > limitup_price and consolidation_day1['open'] > limitup_price and
-            0.97 < consolidation_day1['close'] / consolidation_day1['open'] < 1.03):
+    if not (consolidation_day1['open'] > limitup_price and consolidation_day1['close'] > limitup_price and
+            consolidation_day1['p_change'] > 0 and abs(consolidation_day1['close'] / consolidation_day1['open'] - 1) < 0.03):
         return False
 
     for _close, _p_change, _open in zip(consolidation_day23['close'].values, consolidation_day23['p_change'].values, consolidation_day23['open'].values):
-        if not (0.97 < (_close / _open) < 1.03 and -5 < _p_change < 5
+        if not (abs(_close / _open - 1) < 0.03 and 0 < _p_change < 5
                 and _close > limitup_price and _open > limitup_price):
             return False
 

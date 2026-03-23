@@ -26,14 +26,15 @@ def check(code_name, data, date=None, threshold=60):
     if ratio_increase < 0.6:
         return False
 
-    # 允许有一次“洗盘”
-    previous_p_change = 100.0
-    previous_open = -1000000.0
+    previous_p_change = None
+    previous_open = None
     for _p_change, _close, _open in zip(data['p_change'].values, data['close'].values, data['open'].values):
         # 单日跌幅超7%；高开低走7%；两日累计跌幅10%；两日高开低走累计10%
-        if _p_change < -7 or (_close - _open) / _open * 100 < -7 \
-                or previous_p_change + _p_change < -10 \
-                or (_close - previous_open)/previous_open * 100 < -10:
+        if _p_change < -7 or (_close - _open) / _open * 100 < -7:
+            return False
+        if previous_p_change is not None and previous_p_change + _p_change < -10:
+            return False
+        if previous_open is not None and (_close - previous_open) / previous_open * 100 < -10:
             return False
         previous_p_change = _p_change
         previous_open = _open

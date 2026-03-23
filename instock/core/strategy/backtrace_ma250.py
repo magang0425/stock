@@ -4,7 +4,6 @@
 import numpy as np
 import pandas as pd
 import talib as tl
-from datetime import timedelta
 
 __author__ = 'myh '
 __date__ = '2023/3/10 '
@@ -32,25 +31,19 @@ def check(code_name, data, date=None, threshold=60):
 
     data = data.tail(n=threshold)
 
-    # 区间最低点
-    lowest_row = [1000000, 0, '']
     # 区间最高点
     highest_row = [0, 0, '']
     # 近期低点
     recent_lowest_row = [1000000, 0, '']
 
-    # 计算区间最高、最低价格
+    # 计算区间最高价格
     for _close, _volume, _date in zip(data['close'].values, data['volume'].values, data['date'].values):
         if _close > highest_row[0]:
             highest_row[0] = _close
             highest_row[1] = _volume
             highest_row[2] = _date
-        elif _close < lowest_row[0]:
-            lowest_row[0] = _close
-            lowest_row[1] = _volume
-            lowest_row[2] = _date
 
-    if lowest_row[1] == 0 or highest_row[1] == 0:
+    if highest_row[1] == 0:
         return False
 
     data_front = data.loc[(data['date'] < highest_row[2])]
@@ -63,6 +56,9 @@ def check(code_name, data, date=None, threshold=60):
             data_front.iloc[-1]['close'] > data_front.iloc[-1]['ma250']):
         return False
 
+    highest_index = data.index[data['date'] == highest_row[2]]
+    highest_index = highest_index[-1] if len(highest_index) > 0 else None
+
     if not data_end.empty:
         # 后半段必须在年线以上运行（回踩年线）
         for _close, _volume, _date, _ma250 in zip(data_end['close'].values, data_end['volume'].values, data_end['date'].values, data_end['ma250'].values):
@@ -73,10 +69,16 @@ def check(code_name, data, date=None, threshold=60):
                 recent_lowest_row[1] = _volume
                 recent_lowest_row[2] = _date
 
-    date_diff = pd.Timestamp(recent_lowest_row[2]).date() - \
-                pd.Timestamp(highest_row[2]).date()
+    if recent_lowest_row[2] == '' or recent_lowest_row[1] == 0:
+        return False
 
-    if not (timedelta(days=10) <= date_diff <= timedelta(days=50)):
+    recent_lowest_index = data.index[data['date'] == recent_lowest_row[2]]
+    recent_lowest_index = recent_lowest_index[-1] if len(recent_lowest_index) > 0 else None
+    if highest_index is None or recent_lowest_index is None:
+        return False
+
+    trading_day_diff = recent_lowest_index - highest_index
+    if not (10 <= trading_day_diff <= 50):
         return False
     # 回踩伴随缩量
     vol_ratio = highest_row[1] / recent_lowest_row[1]

@@ -12,7 +12,7 @@ __date__ = '2023/3/10 '
 # 均线多头
 # 1.30日前的30日均线<20日前的30日均线<10日前的30日均线<当日的30日均线
 # 3.(当日的30日均线/30日前的30日均线)>1.2
-def check(code_name, data, date=None, threshold=30):
+def check(code_name, data, date=None, threshold=60):
     if date is None:
         end_date = code_name[0]
     else:
@@ -26,13 +26,15 @@ def check(code_name, data, date=None, threshold=30):
     data.loc[:, 'ma30'] = tl.MA(data['close'].values, timeperiod=30)
     data['ma30'].values[np.isnan(data['ma30'].values)] = 0.0
 
-    data = data.tail(n=threshold)
+    ma30_30 = data.iloc[-31]['ma30']
+    ma30_20 = data.iloc[-21]['ma30']
+    ma30_10 = data.iloc[-11]['ma30']
+    ma30_now = data.iloc[-1]['ma30']
 
-    step1 = round(threshold / 3)
-    step2 = round(threshold * 2 / 3)
+    if ma30_30 == 0:
+        return False
 
-    if data.iloc[0]['ma30'] < data.iloc[step1]['ma30'] < \
-            data.iloc[step2]['ma30'] < data.iloc[-1]['ma30'] and data.iloc[-1]['ma30'] > 1.2 * data.iloc[0]['ma30']:
+    if ma30_30 < ma30_20 < ma30_10 < ma30_now and ma30_now > 1.2 * ma30_30:
         return True
     else:
         return False

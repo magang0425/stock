@@ -34,20 +34,21 @@ def check(code_name, data, date=None, threshold=60):
     if len(data.index) < threshold + 1:
         return False
 
-    # 最后一天收盘价
-    last_close = data.iloc[-1]['close']
-    # 最后一天成交量
+    # 优先使用历史数据中的真实成交额，缺失时再退化为价格*成交量。
+    last_amount = data.iloc[-1]['amount']
+    if np.isnan(last_amount):
+        last_amount = data.iloc[-1]['close'] * data.iloc[-1]['volume']
     last_vol = data.iloc[-1]['volume']
 
-    amount = last_close * last_vol
-
     # 成交额不低于2亿
-    if amount < 200000000:
+    if last_amount < 200000000:
         return False
 
     data = data.head(n=threshold)
 
     mean_vol = data.iloc[-1]['vol_ma5']
+    if mean_vol <= 0:
+        return False
 
     vol_ratio = last_vol / mean_vol
     if vol_ratio >= 4:
