@@ -89,6 +89,7 @@ def save_nph_stock_fund_flow_data(date, before=True):
             return
 
         data.insert(0, 'date', date.strftime("%Y-%m-%d"))
+        data = data.drop_duplicates(subset=['date', 'code'], keep='first')
 
         table_name = tbs.TABLE_CN_STOCK_FUND_FLOW['name']
         # 删除老数据。

@@ -24,8 +24,10 @@ def save_nph_stock_spot_data(date, before=True):
         return
     # 股票列表
     try:
+        logging.info(f"save_nph_stock_spot_data: start date={date}")
         data = stock_data(date).get_data()
         if data is None or len(data.index) == 0:
+            logging.info(f"save_nph_stock_spot_data: empty data date={date}")
             return
 
         table_name = tbs.TABLE_CN_STOCK_SPOT['name']
@@ -37,7 +39,9 @@ def save_nph_stock_spot_data(date, before=True):
         else:
             cols_type = tbs.get_field_types(tbs.TABLE_CN_STOCK_SPOT['columns'])
 
+        logging.info(f"save_nph_stock_spot_data: inserting rows={len(data.index)} date={date}")
         mdb.insert_db_from_df(data, table_name, cols_type, False, "`date`,`code`")
+        logging.info(f"save_nph_stock_spot_data: inserted rows={len(data.index)} date={date}")
 
     except Exception as e:
         logging.error(f"basic_data_daily_job.save_stock_spot_data处理异常：{e}")

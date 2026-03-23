@@ -438,6 +438,44 @@ abc:123456@65.1.244.232:3128
 
 ### 10.运行说明
 
+#### 10.0.本地直跑方式（推荐 macOS/Linux 开发使用）
+
+若数据库已经单独启动，可以直接在本地运行 Python Web 和作业脚本，无需启动应用 Docker 容器。
+
+```
+# 1.创建虚拟环境
+uv venv .venv --python 3.13
+
+# 2.安装依赖
+source .venv/bin/activate
+uv pip install -r requirements.txt
+
+# 3.配置数据库环境变量
+# 在项目根目录创建 .env，例如：
+db_host=127.0.0.1
+db_user=root
+db_password=你的数据库密码
+db_database=instockdb
+db_port=3306
+
+# 4.启动 Web
+./run_local_web.sh
+
+# 5.执行整体作业
+./run_local_job.sh
+```
+
+执行单个作业示例：
+
+```
+./run_local_job.sh init_job
+./run_local_job.sh basic_data_daily_job
+./run_local_job.sh execute_daily_job 2023-03-01
+./run_local_job.sh execute_daily_job 2023-03-01 2023-03-21
+```
+
+启动 Web 后，打开浏览器访问：http://localhost:9988/ 。
+
 #### 10.1.执行数据抓取、处理、分析、识别
 
 支持批量作业，具体参见run_job.bat中的注释说明。

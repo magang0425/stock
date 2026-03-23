@@ -6,6 +6,7 @@ Desc: 东方财富网-行情首页-沪深京 A 股
 """
 import random
 import time
+import logging
 
 import pandas as pd
 import math
@@ -45,10 +46,13 @@ def stock_zh_a_spot_em() -> pd.DataFrame:
     data_json = r.json()
     data = data_json["data"]["diff"]
     if not data:
+        logging.info("stock_zh_a_spot_em: page 1 returned no data")
         return pd.DataFrame()
 
     data_count = data_json["data"]["total"]
     page_count = math.ceil(data_count/page_size)
+    logging.info(f"stock_zh_a_spot_em: start fetch total={data_count}, page_size={page_size}, page_count={page_count}")
+    page_no = 1
     while page_count > 1:
         # 添加随机延迟，避免爬取过快
         time.sleep(random.uniform(1, 1.5))
@@ -59,6 +63,9 @@ def stock_zh_a_spot_em() -> pd.DataFrame:
         _data = data_json["data"]["diff"]
         data.extend(_data)
         page_count =page_count - 1
+        page_no += 1
+        if page_no % 10 == 0 or page_count == 1:
+            logging.info(f"stock_zh_a_spot_em: fetched page {page_no}, accumulated_rows={len(data)}")
 
     temp_df = pd.DataFrame(data)
     temp_df.columns = [
@@ -185,6 +192,7 @@ def stock_zh_a_spot_em() -> pd.DataFrame:
     temp_df["流通市值"] = pd.to_numeric(temp_df["流通市值"], errors="coerce")
     temp_df["上市时间"] = pd.to_datetime(temp_df["上市时间"], format='%Y%m%d', errors="coerce")
 
+    logging.info(f"stock_zh_a_spot_em: finished rows={len(temp_df)}")
     return temp_df
 
 

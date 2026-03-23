@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import logging
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -51,6 +52,8 @@ class eastmoney_fetcher:
     def _create_session(self):
         """创建并配置会话"""
         session = requests.Session()
+        # 避免 requests 自动读取系统代理环境变量，影响本地直跑稳定性
+        session.trust_env = False
 
         # 配置连接池
         retry_strategy = Retry(
@@ -103,7 +106,20 @@ class eastmoney_fetcher:
                 response.raise_for_status()  # 检查HTTP错误
                 return response
             except requests.exceptions.RequestException as e:
-                print(f"请求错误: {e}, 第 {i + 1}/{retry} 次重试")
+                logging.warning(f"eastmoney_fetcher.make_request请求错误: {url} 第 {i + 1}/{retry} 次重试 {e}")
+                if self.proxies is not None:
+                    try:
+                        response = self.session.get(
+                            url,
+                            proxies=None,
+                            params=params,
+                            timeout=timeout
+                        )
+                        response.raise_for_status()
+                        logging.warning(f"eastmoney_fetcher.make_request代理失败后直连成功: {url}")
+                        return response
+                    except requests.exceptions.RequestException as direct_e:
+                        logging.warning(f"eastmoney_fetcher.make_request直连仍失败: {url} {direct_e}")
                 if i < retry - 1:
                     # 随机延迟后重试
                     time.sleep(random.uniform(1, 3))

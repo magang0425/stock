@@ -6,6 +6,7 @@ Desc: 东方财富网-数据中心-资金流向
 https://data.eastmoney.com/zjlx/detail.html
 """
 import json
+import logging
 import random
 import time
 import math
@@ -66,8 +67,8 @@ def stock_individual_fund_flow_rank(indicator: str = "5日") -> pd.DataFrame:
     data_count = data_json["data"]["total"]
     page_count = math.ceil(data_count/page_size)
     while page_count > 1:
-        # 添加随机延迟，避免爬取过快
-        time.sleep(random.uniform(1, 1.5))
+        # 保留轻量节流，避免任务耗时过长
+        time.sleep(random.uniform(0.15, 0.35))
         page_current = page_current + 1
         params["pn"] = page_current
         r = fetcher.make_request(url, params=params)
@@ -75,6 +76,8 @@ def stock_individual_fund_flow_rank(indicator: str = "5日") -> pd.DataFrame:
         _data = data_json["data"]["diff"]
         data.extend(_data)
         page_count =page_count - 1
+        if page_current % 20 == 0 or page_count == 1:
+            logging.info(f"stock_individual_fund_flow_rank: indicator={indicator} page={page_current} rows={len(data)}")
 
     temp_df = pd.DataFrame(data)
     temp_df = temp_df[~temp_df["f2"].isin(["-"])]
@@ -296,8 +299,8 @@ def stock_sector_fund_flow_rank(
     data_count = data_json["data"]["total"]
     page_count = math.ceil(data_count/page_size)
     while page_count > 1:
-        # 添加随机延迟，避免爬取过快
-        time.sleep(random.uniform(1, 1.5))
+        # 保留轻量节流，避免任务耗时过长
+        time.sleep(random.uniform(0.15, 0.35))
         page_current = page_current + 1
         params["pn"] = page_current
         r = fetcher.make_request(url, params=params)
@@ -306,6 +309,8 @@ def stock_sector_fund_flow_rank(
         _data = json_data["data"]["diff"]
         data.extend(_data)
         page_count =page_count - 1
+        if page_current % 10 == 0 or page_count == 1:
+            logging.info(f"stock_sector_fund_flow_rank: sector_type={sector_type} indicator={indicator} page={page_current} rows={len(data)}")
 
     temp_df = pd.DataFrame(data)
 

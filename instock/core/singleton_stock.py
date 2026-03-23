@@ -28,7 +28,7 @@ class stock_data(metaclass=singleton_type):
 
 # 读取股票历史数据
 class stock_hist_data(metaclass=singleton_type):
-    def __init__(self, date=None, stocks=None, workers=4):
+    def __init__(self, date=None, stocks=None, workers=1):
         if stocks is None:
             _subset = None
             try:
