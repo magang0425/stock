@@ -1,14 +1,18 @@
 #!/bin/sh
 
-#清除缓存数据
-rm -rf /data/InStock/instock/cache/hist/*
-#MONTH=`date -d '' +%Y%m`
-#cd /data/InStock/instock/cache/hist && rm -rf !(${MONTH})
-#DATE=`date -d '' +%Y-%m-%d`
-#DATE_1=`date -d '-1 days' +%Y-%m-%d`
-#DATE_2=`date -d '-2 days' +%Y-%m-%d`
-#cd /data/InStock/instock/cache/hist/${MONTH} && rm -rf !(${DATE}|${DATE_1}|${DATE_2})
+LOG_DIR=/data/logs
+LOG_FILE=${LOG_DIR}/cron.log
+mkdir -p ${LOG_DIR}
 
-#mkdir -p /data/logs
-#DATE=`date +%Y-%m-%d:%H:%M:%S`
-#echo $DATE >> /data/logs/monthly.log
+START=$(date '+%Y-%m-%d %H:%M:%S')
+echo "[${START}] [monthly] cache cleanup START" >> ${LOG_FILE}
+
+rm -rf /data/InStock/instock/cache/hist/*
+EXIT_CODE=$?
+
+END=$(date '+%Y-%m-%d %H:%M:%S')
+if [ ${EXIT_CODE} -eq 0 ]; then
+    echo "[${END}] [monthly] cache cleanup END (success, started at ${START})" >> ${LOG_FILE}
+else
+    echo "[${END}] [monthly] cache cleanup FAILED (exit_code=${EXIT_CODE}, started at ${START})" >> ${LOG_FILE}
+fi

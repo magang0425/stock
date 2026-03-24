@@ -1,0 +1,8 @@
+.git
+.runtime
+docker
+img
+cron.md
+__pycache__
+.venv
+*.pyc

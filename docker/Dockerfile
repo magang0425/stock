@@ -25,7 +25,7 @@ RUN sed -i "s@http://\\(deb\\|security\\).debian.org@https://mirrors.aliyun.com@
     apt-get install -y cron gcc make python3-dev default-libmysqlclient-dev build-essential pkg-config curl supervisor && \
     curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh && \
     mkdir ta-lib && \
-    curl -SL $(curl -s https://api.github.com/repos/ta-lib/ta-lib/releases/latest | grep browser_download_url | cut -d'"' -f4 | grep -E 'tar.gz$') | tar -xz --strip-components=1 -C ./ta-lib && \
+    curl -SL https://github.com/ta-lib/ta-lib/releases/latest/download/ta-lib-0.6.4-src.tar.gz | tar -xz --strip-components=1 -C ./ta-lib && \
     cd ta-lib/ && \
     ./configure && \
     make && \
@@ -41,7 +41,7 @@ RUN sed -i "s@http://\\(deb\\|security\\).debian.org@https://mirrors.aliyun.com@
 WORKDIR /data/InStock
 
 # InStock 软件
-COPY stock /data/InStock
+COPY . /data/InStock
 COPY cron/cron.hourly /etc/cron.hourly
 COPY cron/cron.workdayly /etc/cron.workdayly
 COPY cron/cron.monthly /etc/cron.monthly

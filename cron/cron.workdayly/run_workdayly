@@ -1,8 +1,19 @@
 #!/bin/sh
 
-cd /data/InStock
-exec uv run --frozen instock-job execute_daily_job
+LOG_DIR=/data/logs
+LOG_FILE=${LOG_DIR}/cron.log
+mkdir -p ${LOG_DIR}
 
-#mkdir -p /data/logs
-#DATE=`date +%Y-%m-%d:%H:%M:%S`
-#echo $DATE >> /data/logs/workdayly.log
+START=$(date '+%Y-%m-%d %H:%M:%S')
+echo "[${START}] [workdayly] execute_daily_job START" >> ${LOG_FILE}
+
+cd /data/InStock
+uv run --frozen instock-job execute_daily_job >> ${LOG_FILE} 2>&1
+EXIT_CODE=$?
+
+END=$(date '+%Y-%m-%d %H:%M:%S')
+if [ ${EXIT_CODE} -eq 0 ]; then
+    echo "[${END}] [workdayly] execute_daily_job END (success, started at ${START})" >> ${LOG_FILE}
+else
+    echo "[${END}] [workdayly] execute_daily_job FAILED (exit_code=${EXIT_CODE}, started at ${START})" >> ${LOG_FILE}
+fi

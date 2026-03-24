@@ -1,6 +1,9 @@
 services:
   instock:
-    image: mayanghua/instock:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: instock:latest
     container_name: InStock
     restart: always
     ports:
@@ -14,6 +17,7 @@ services:
     volumes:
       - ../.runtime/proxy.txt:/data/InStock/instock/config/proxy.txt
       - ../.runtime/eastmoney_cookie.txt:/data/InStock/instock/config/eastmoney_cookie.txt
+      - ../.runtime/logs:/data/logs
     networks:
       - local-net
 
