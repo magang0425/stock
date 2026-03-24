@@ -13,6 +13,7 @@ dependencies = [
   "beautifulsoup4==4.14.3",
   "bokeh==3.8.1",
   "brotli==1.2.0",
+  "cryptography>=46.0.5",
   "easytrader==0.23.7",
   "logbook==1.9.2",
   "mini-racer==0.13.2",
