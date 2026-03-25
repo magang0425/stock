@@ -18,7 +18,6 @@ dependencies = [
   "mini-racer==0.13.2",
   "numpy==2.4.1",
   "pandas==2.3.3",
-  "py-mini-racer==0.6.0",
   "pycryptodome==3.23.0",
   "pymysql==1.1.2",
   "python-dateutil==2.9.0.post0",

@@ -275,7 +275,6 @@ dependencies = [
     { name = "mini-racer" },
     { name = "numpy" },
     { name = "pandas" },
-    { name = "py-mini-racer" },
     { name = "pycryptodome" },
     { name = "pymysql" },
     { name = "python-dateutil" },
@@ -298,7 +297,6 @@ requires-dist = [
     { name = "mini-racer", specifier = "==0.13.2" },
     { name = "numpy", specifier = "==2.4.1" },
     { name = "pandas", specifier = "==2.3.3" },
-    { name = "py-mini-racer", specifier = "==0.6.0" },
     { name = "pycryptodome", specifier = "==3.23.0" },
     { name = "pymysql", specifier = "==1.1.2" },
     { name = "python-dateutil", specifier = "==2.9.0.post0" },
@@ -506,17 +504,6 @@ wheels = [
     { url = "https://mirror.nju.edu.cn/pypi/web/packages/00/98/fc53ab36da80b88df0967896b6c4b4cd948a0dc5aa40a754266aa3ae48b3/pillow-12.1.1-pp311-pypy311_pp73-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:f975aa7ef9684ce7e2c18a3aa8f8e2106ce1e46b94ab713d156b2898811651d3" },
     { url = "https://mirror.nju.edu.cn/pypi/web/packages/30/02/00fa585abfd9fe9d73e5f6e554dc36cc2b842898cbfc46d70353dae227f8/pillow-12.1.1-pp311-pypy311_pp73-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8089c852a56c2966cf18835db62d9b34fef7ba74c726ad943928d494fa7f4735" },
     { url = "https://mirror.nju.edu.cn/pypi/web/packages/f2/26/c56ce33ca856e358d27fda9676c055395abddb82c35ac0f593877ed4562e/pillow-12.1.1-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:cb9bb857b2d057c6dfc72ac5f3b44836924ba15721882ef103cecb40d002d80e" },
-]
-
-[[package]]
-name = "py-mini-racer"
-version = "0.6.0"
-source = { registry = "https://mirror.nju.edu.cn/pypi/web/simple" }
-sdist = { url = "https://mirror.nju.edu.cn/pypi/web/packages/50/97/a578b918b2e5923dd754cb60bb8b8aeffc85255ffb92566e3c65b148ff72/py_mini_racer-0.6.0.tar.gz", hash = "sha256:f71e36b643d947ba698c57cd9bd2232c83ca997b0802fc2f7f79582377040c11" }
-wheels = [
-    { url = "https://mirror.nju.edu.cn/pypi/web/packages/13/13/058240c7fd1fbf29a24bda048d93346c2a56275736b76b56afe64050a161/py_mini_racer-0.6.0-py2.py3-none-macosx_10_10_x86_64.whl", hash = "sha256:346e73bb89a2024888244d487834be24a121089ceb0641dd0200cb96c4e24b57" },
-    { url = "https://mirror.nju.edu.cn/pypi/web/packages/29/a9/8ce0ca222ef04d602924a1e099be93f5435ca6f3294182a30574d4159ca2/py_mini_racer-0.6.0-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:42896c24968481dd953eeeb11de331f6870917811961c9b26ba09071e07180e2" },
-    { url = "https://mirror.nju.edu.cn/pypi/web/packages/5d/71/76ac5d593e14b148a4847b608c5ad9a2c7c4827c796c33b396d0437fa113/py_mini_racer-0.6.0-py2.py3-none-win_amd64.whl", hash = "sha256:97cab31bbf63ce462ba4cd6e978c572c916d8b15586156c7c5e0b2e42c10baab" },
 ]
 
 [[package]]
